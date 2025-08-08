@@ -128,3 +128,15 @@ SELECT DISTINCT cidade FROM clientes;
 3. Liste os nomes dos produtos que contêm "game" no nome.
 4. Mostre os 3 produtos mais baratos.
 5. Liste os nomes dos clientes que moram em "Porto Alegre" ou "Canoas".
+6. Liste o nome e a cidade dos clientes que moram em Canoas.
+7. Mostre todos os clientes com idade entre 30 e 40 anos.
+8. Liste o nome e preço dos produtos que contenham "Note" no nome.
+9. Mostre todos os clientes que moram em São Paulo, Porto Alegre ou Curitiba.
+10. Liste todos os produtos da categoria Games, ordenados do mais caro para o mais barato.
+11. Mostre apenas os 5 primeiros produtos mais caros da tabela.
+12. Liste os 3 clientes mais jovens (nome, idade e cidade).
+13. Mostre os produtos com preço menor que 100 reais.
+14. Liste nome e categoria dos produtos que custam mais de 1000 reais e sejam da categoria Informática ou Eletrônicos.
+15. Mostre apenas as cidades distintas onde há clientes cadastrados.
+16. Liste todos os clientes que não moram em São Paulo.
+17. Mostre todos os produtos cujo preço não esteja entre 200 e 800 reais.
