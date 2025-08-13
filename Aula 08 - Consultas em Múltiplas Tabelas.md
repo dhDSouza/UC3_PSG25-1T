@@ -2,21 +2,29 @@
 
 ## 🎯 Objetivo da Aula
 
-Aprender a realizar **consultas que envolvem múltiplas tabelas** apenas com condições WHERE, combinando dados de diferentes tabelas de forma eficiente.
+Aprender a realizar **consultas que envolvem múltiplas tabelas** apenas com condições `WHERE`, combinando dados de tabelas relacionadas de forma eficiente.
 
 ---
 
 ## 🧠 Revisão Rápida: Relacionamento entre Tabelas
 
 Em bancos de dados relacionais, as tabelas estão conectadas através de **chaves**:
-- **Chave primária (PK)**: Identificador único em uma tabela
-- **Chave estrangeira (FK)**: Referência a uma chave primária em outra tabela
+
+* **Chave primária (PK)**: Identificador único em uma tabela.
+* **Chave estrangeira (FK)**: Referência a uma chave primária em outra tabela.
+
+No nosso caso:
+
+* **clientes.id** é PK da tabela `clientes`.
+* **produtos.id** é PK da tabela `produtos`.
+* **compras.cliente_id** é FK que aponta para `clientes.id`.
+* **compras.produto_id** é FK que aponta para `produtos.id`.
 
 ---
 
 ## 🔗 Consultando Múltiplas Tabelas com WHERE
 
-Podemos relacionar tabelas especificando a condição de relacionamento no WHERE:
+Podemos relacionar tabelas especificando a condição de relacionamento diretamente no `WHERE`:
 
 ```sql
 SELECT tabela1.coluna, tabela2.coluna
@@ -24,70 +32,82 @@ FROM tabela1, tabela2
 WHERE tabela1.chave = tabela2.chave;
 ```
 
-📌 **Exemplo prático**:
+📌 **Exemplo prático com nosso banco**:
+
 ```sql
-SELECT clientes.nome, produtos.nome
-FROM clientes, produtos
-WHERE clientes.id = 5 AND produtos.preco > 1000;
+SELECT c.nome AS cliente, p.nome AS produto
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
+  AND p.preco > 1000;
 ```
 
 ---
 
-## 🔍 Tipos de Relacionamentos
+## 🔍 Tipos de Relacionamentos no Nosso Banco
 
-### 1. Relacionamento 1:1 (Um para Um)
+### 1. Relacionamento 1:N (Um para Muitos)
+
+Um cliente pode ter várias compras.
 
 ```sql
-SELECT tabela1.*, tabela2.*
-FROM tabela1, tabela2
-WHERE tabela1.id = tabela2.id_tabela1;
+SELECT c.nome, co.id, co.data_compra
+FROM clientes c, compras co
+WHERE c.id = co.cliente_id;
 ```
 
-### 2. Relacionamento 1:N (Um para Muitos)
+### 2. Relacionamento N:M (Muitos para Muitos)
+
+Um cliente pode comprar muitos produtos e um produto pode ser comprado por vários clientes.
+A tabela `compras` faz essa ligação.
 
 ```sql
-SELECT tabela_pai.*, tabela_filho.*
-FROM tabela_pai, tabela_filho
-WHERE tabela_pai.id = tabela_filho.id_pai;
-```
-
-### 3. Relacionamento N:M (Muitos para Muitos)
-
-```sql
-SELECT tabela1.*, tabela2.*
-FROM tabela1, tabela2, tabela_intermediaria
-WHERE tabela1.id = tabela_intermediaria.id_tabela1
-AND tabela2.id = tabela_intermediaria.id_tabela2;
+SELECT c.nome, p.nome, co.quantidade
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id;
 ```
 
 ---
 
-## 🛠️ Técnicas Avançadas
+## 🛠️ Técnicas Úteis
 
-### 1. Aliases para tabelas (AS)
+### 1. Aliases para Tabelas
 
-```sql
-SELECT c.nome, p.nome
-FROM clientes AS c, produtos AS p
-WHERE c.cidade = 'São Paulo' AND p.preco > 500;
-```
-
-### 2. Filtros adicionais
+Deixam a consulta mais curta e legível:
 
 ```sql
 SELECT c.nome, p.nome
-FROM clientes c, produtos p
-WHERE c.idade > 30 
-AND p.categoria = 'Games'
-AND p.preco < 1000;
+FROM clientes AS c, compras AS co, produtos AS p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
+  AND c.cidade = 'São Paulo'
+  AND p.preco > 500;
 ```
 
-### 3. Ordenação combinada
+### 2. Filtros Adicionais
+
+Podemos combinar condições de múltiplas tabelas:
+
+```sql
+SELECT c.nome, p.nome
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
+  AND c.idade > 30
+  AND p.categoria = 'Games'
+  AND p.preco < 1000;
+```
+
+### 3. Ordenação Combinada
+
+Ordenar usando colunas de tabelas diferentes:
 
 ```sql
 SELECT c.nome, p.nome, p.preco
-FROM clientes c, produtos p
-WHERE c.cidade = p.categoria -- Exemplo fictício
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
 ORDER BY c.nome ASC, p.preco DESC;
 ```
 
@@ -95,55 +115,68 @@ ORDER BY c.nome ASC, p.preco DESC;
 
 ## ⚠️ Cuidados Importantes
 
-1. **Produto cartesiano**: Sem WHERE, você combina TODAS as linhas de ambas tabelas!
-   - Tabela A com 10 linhas + Tabela B com 20 linhas = 200 linhas no resultado!
+1. **Produto cartesiano**: sem `WHERE` de ligação, todas as linhas de ambas tabelas são combinadas.   
+   Exemplo: 10 clientes × 20 produtos = 200 combinações.
+   
+<div align="center">
+    <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW45djFydm85Z3dpN3ZnaTQwbHZtZHZuanllaDlycWx1ZnJ1NXk1MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUPGcjUQcWclgK94ti/giphy.gif" alt="Você está demitido">
+    <p>
+        Fonte: <em><a href="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW45djFydm85Z3dpN3ZnaTQwbHZtZHZuanllaDlycWx1ZnJ1NXk1MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUPGcjUQcWclgK94ti/giphy.gif" target="_blank">https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZW45djFydm85Z3dpN3ZnaTQwbHZtZHZuanllaDlycWx1ZnJ1NXk1MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xUPGcjUQcWclgK94ti/giphy.gif</a></em>
+    </p>
+</div>  
 
-2. **Desempenho**: Consultas em múltiplas tabelas podem ser pesadas - sempre filtre o máximo possível.
+2. **Desempenho**: sempre use filtros para reduzir resultados desnecessários.
 
-3. **Clareza**: Use aliases e nomeie as colunas explicitamente (tabela.coluna) para evitar ambiguidades.
+3. **Clareza**: use aliases (`c`, `p`, `co`) e prefixe as colunas (`tabela.coluna`) para evitar ambiguidades.
 
 ---
 
-## 🚀 Exemplos Práticos
+## 🚀 Exemplos Práticos com Nosso Banco
 
-Usando nosso banco de dados atual (clientes e produtos):
-
-1. Mostre os nomes dos clientes e produtos onde o preço do produto é maior que 1000
-
-```sql
-SELECT c.nome AS cliente, p.nome AS produto
-FROM clientes c, produtos p
-WHERE p.preco > 1000;
-```
-
-2. Liste clientes de Porto Alegre com produtos que contenham "Notebook" no nome
-
-```sql
-SELECT c.nome AS cliente, p.nome AS produto
-FROM clientes c, produtos p
-WHERE c.cidade = 'Porto Alegre'
-AND p.nome LIKE '%Notebook%';
-```
-
-3. Combine clientes de São Paulo com produtos da categoria Informática, ordenando por preço decrescente
+### 1. Clientes que compraram produtos acima de R$ 1000
 
 ```sql
 SELECT c.nome AS cliente, p.nome AS produto, p.preco
-FROM clientes c, produtos p
-WHERE c.cidade = 'São Paulo'
-AND p.categoria = 'Informática'
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
+  AND p.preco > 1000;
+```
+
+### 2. Clientes de Porto Alegre que compraram "Notebook"
+
+```sql
+SELECT c.nome AS cliente, p.nome AS produto
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
+  AND c.cidade = 'Porto Alegre'
+  AND p.nome LIKE '%Notebook%';
+```
+
+### 3. Clientes de São Paulo com produtos de Informática, ordenados por preço decrescente
+
+```sql
+SELECT c.nome AS cliente, p.nome AS produto, p.preco
+FROM clientes c, compras co, produtos p
+WHERE c.id = co.cliente_id
+  AND p.id = co.produto_id
+  AND c.cidade = 'São Paulo'
+  AND p.categoria = 'Informática'
 ORDER BY p.preco DESC;
 ```
 
 ---
 
-## 📌 Conclusão
+## 🏋️ Exercícios
 
-Consultas em múltiplas tabelas sem JOIN são:
-- Poderosas para combinar dados relacionados
-- Exigem cuidado para evitar produtos cartesianos
-- Úteis quando você precisa de combinações específicas
-- A base para entender os JOINs que veremos depois!
-
-> [!TIP]
-> Prática é essencial - experimente criar suas próprias combinações!
+1. Liste o nome dos clientes e os produtos que eles compraram.
+2. Mostre os clientes que compraram mais de 1 unidade de qualquer produto.
+3. Liste os produtos da categoria "Eletrônicos" comprados por clientes de Canoas.
+4. Mostre os clientes que compraram "Gamepad 54".
+5. Liste todos os clientes que já compraram "Notebook".
+6. Mostre os nomes dos clientes e os preços dos produtos comprados acima de R$ 1500.
+7. Liste clientes de Salvador que compraram produtos da categoria "Informática".
+8. Mostre todos os produtos que o cliente "Ana Fernandes" já comprou.
+9. Liste todos os clientes que compraram produtos cujo nome começa com "Camiseta".
+10. Mostre todos os clientes e produtos comprados em fevereiro de 2025.
