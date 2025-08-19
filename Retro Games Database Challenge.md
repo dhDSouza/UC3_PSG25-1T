@@ -1,6 +1,6 @@
 # 👾 Retro Games Database Challenge
 
-![Retro Games Database Challenge]("./Images/Retro_Games_Database_Challenge.png")
+![Retro Games Database Challenge](./Images/Retro_Games_Database_Challenge.png)
 
 ## 👥 Organização da Turma
 
